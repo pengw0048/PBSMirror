@@ -45,14 +45,44 @@ namespace HelloWIFI
         [DataMember] public long time;
     };
 
+    class OccurenceCounter<TKey>
+    {
+        private Dictionary<TKey, int> dict;
+        public OccurenceCounter()
+        {
+            dict = new Dictionary<TKey, int>();
+        }
+        public void add(TKey key)
+        {
+            if (!dict.ContainsKey(key)) dict.Add(key, 0);
+            dict[key]++;
+        }
+        public override string ToString()
+        {
+            string ret = "";
+            bool first = true;
+            foreach (var item in dict)
+            {
+                if (!first) ret+=" ";
+                ret += item;
+                first = false;
+            }
+            return ret;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
             int total = 0;
             int JsonFail = 0;
-            var functions = new HashSet<string>();
+            var functions = new OccurenceCounter<string>();
             int isAuths = 0;
+            var wfs = new OccurenceCounter<int>();
+            var bss = new OccurenceCounter<int>();
+            var bslegal = new OccurenceCounter<int>();
+            var bstag = new OccurenceCounter<int>();
 
             var sw = new Stopwatch();
             sw.Start();
@@ -74,8 +104,18 @@ namespace HelloWIFI
                             Console.WriteLine(e.Message);
                             continue;
                         }
-                    functions.Add(query.function);
+                    functions.add(query.function);
                     if (query.isAuthority) isAuths++;
+                    wfs.add(query.wf.Length);
+                    bss.add(query.bs.Length);
+                    int legal = 0;
+                    for (int i = 0; i < query.bs.Length; i++)
+                        if (query.bs[i].legal) legal++;
+                    bslegal.add(legal);
+                    int tag = 0;
+                    for (int i = 0; i < query.bs.Length; i++)
+                        if (query.bs[i].tag) tag++;
+                    bstag.add(tag);
                 }
             }
             sw.Stop();
@@ -83,13 +123,12 @@ namespace HelloWIFI
 
             Console.WriteLine("Total records: " + total);
             Console.WriteLine("Json read error: " + JsonFail);
-            Console.Write("function:");
-            foreach (var func in functions)
-            {
-                Console.Write(" "+func);
-            }
-            Console.WriteLine();
+            Console.WriteLine("function:" + functions);
             Console.WriteLine("isAuthority: " + isAuths);
+            Console.WriteLine("#wf: " + wfs);
+            Console.WriteLine("#bs: " + bss);
+            Console.WriteLine("#bs legal: " + bslegal);
+            Console.WriteLine("#bs tag: " + bstag);
             Console.WriteLine("---Done---");
             Console.ReadLine();
         }
