@@ -116,6 +116,11 @@ namespace HelloWIFI
                     for (int i = 0; i < query.bs.Length; i++)
                         if (query.bs[i].tag) tag++;
                     bstag.add(tag);
+                    /*foreach (var bs in query.bs)
+                    {
+                        if (bs.legal == false && bs.tag == true)
+                            bs.legal = false;
+                    }*/
                 }
             }
             sw.Stop();
