@@ -152,23 +152,15 @@ namespace GoogleBaseLoc
                             try
                             {
                                 res = (HttpWebResponse)req.GetResponse();
-                                try
-                                {
-                                    var glr = (GoogleLocResponse)ser2.ReadObject(res.GetResponseStream());
-                                    try { res.Close(); } catch (Exception) { }
-                                    lon = glr.location.lng;
-                                    lat = glr.location.lat;
-                                    accuracy = glr.accuracy;
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine(e.Message);
-                                    continue;
-                                }
+                                var glr = (GoogleLocResponse)ser2.ReadObject(res.GetResponseStream());
+                                try { res.Close(); } catch (Exception) { }
+                                lon = glr.location.lng;
+                                lat = glr.location.lat;
+                                accuracy = glr.accuracy;
                             }
                             catch (WebException e)
                             {
-                                if (res == null) { Console.WriteLine(e.Message); try { res.Close(); } catch (Exception) { } continue; }
+                                res = (HttpWebResponse)e.Response;
                                 Console.WriteLine(e.Message);
                                 if (res.StatusCode == HttpStatusCode.Forbidden)
                                 {
@@ -180,7 +172,7 @@ namespace GoogleBaseLoc
                                     Console.WriteLine("Not found.");
                                     tag = false;
                                 }
-                                try { res.Close(); } catch (Exception){ }
+                                try { res.Close(); } catch (Exception) { }
                             }
                             catch (Exception e) { Console.WriteLine(e.Message); try { res.Close(); } catch (Exception) { } continue; }
                             cmd = new MySqlCommand("INSERT INTO googlebs(id,tag,lon,lat,accuracy) VALUES('"+bs.id+"',"+tag+","+lon+","+lat+","+accuracy+"0)", conn);
