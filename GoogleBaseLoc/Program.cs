@@ -168,6 +168,7 @@ namespace GoogleBaseLoc
                             }
                             catch (WebException e)
                             {
+                                if (res == null) { Console.WriteLine(e.Message); try { res.Close(); } catch (Exception) { } continue; }
                                 Console.WriteLine(e.Message);
                                 if (res.StatusCode == HttpStatusCode.Forbidden)
                                 {
