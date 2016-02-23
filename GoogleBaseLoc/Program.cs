@@ -123,22 +123,23 @@ namespace GoogleBaseLoc
                         if (ti == 0)
                         {
                             Console.Write(bs.id + " ... ");
-                            string mcc, mnc, lac, cid;
+                            int mcc, mnc, lac, cid;
                             try
                             {
                                 var ts = bs.id.Split('|');
-                                mcc = (ts[0]);
-                                mnc = (ts[1]);
-                                lac = (ts[2]);
-                                cid = (ts[3]);
+                                mcc = int.Parse(ts[0]);
+                                mnc = int.Parse(ts[1]);
+                                lac = int.Parse(ts[2]);
+                                cid = int.Parse(ts[3]);
                             }
                             catch (Exception e) { Console.WriteLine(e.Message); continue; }
                             HttpWebRequest req = null;
                             HttpWebResponse res = null;
                             try
                             {
-                                req = (HttpWebRequest)WebRequest.Create(new Uri("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyCgWuezqquuwt1TzEO2IjCZOL9TGtEOOp8"));
+                                req = (HttpWebRequest)WebRequest.Create(new Uri("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyB32yWrWa5C11kt0XpHHS3V13NekRENzS4"));
                                 req.Method = "POST";
+                                req.ContentType = "application/json";
                                 var post = "{\"considerIp\": \"false\",\"cellTowers\":[{\"cellId\":" + cid + ",\"locationAreaCode\":" + lac + ",\"mobileCountryCode\":" + mcc + ",\"mobileNetworkCode\":" + mnc + "}]}";
                                 var data = Encoding.UTF8.GetBytes(post);
                                 req.ContentLength = data.Length;
@@ -161,23 +162,24 @@ namespace GoogleBaseLoc
                             catch (WebException e)
                             {
                                 res = (HttpWebResponse)e.Response;
-                                Console.WriteLine(e.Message);
+                                Console.Write(e.Message);
                                 if (res.StatusCode == HttpStatusCode.Forbidden)
                                 {
                                     Console.WriteLine("No quota. Program terminates.");
                                     return;
                                 }
-                                if (res.StatusCode == HttpStatusCode.NotFound)
+                                else if (res.StatusCode == HttpStatusCode.NotFound)
                                 {
-                                    Console.WriteLine("Not found.");
+                                    Console.Write("Not found.");
                                     tag = false;
                                 }
+                                else Console.WriteLine();
                                 try { res.Close(); } catch (Exception) { }
                             }
                             catch (Exception e) { Console.WriteLine(e.Message); try { res.Close(); } catch (Exception) { } continue; }
-                            cmd = new MySqlCommand("INSERT INTO googlebs(id,tag,lon,lat,accuracy) VALUES('"+bs.id+"',"+tag+","+lon+","+lat+","+accuracy+"0)", conn);
+                            cmd = new MySqlCommand("INSERT INTO googlebs(id,tag,lon,lat,accuracy) VALUES('" + bs.id + "'," + tag + "," + lon + "," + lat + "," + accuracy + "0)", conn);
                             cmd.ExecuteScalar();
-                            Console.WriteLine(bs.lon + " " + bs.lat + " " + accuracy);
+                            Console.WriteLine(lon + " " + lat + " " + accuracy);
                         }
                     }
                 }
@@ -185,3 +187,4 @@ namespace GoogleBaseLoc
         }
     }
 }
+
