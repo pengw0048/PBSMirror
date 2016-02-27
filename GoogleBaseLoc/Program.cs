@@ -184,6 +184,7 @@ namespace GoogleBaseLoc
                                         Console.WriteLine("All keys invalid.");
                                         return;
                                     }
+                                    continue;
                                 }
                                 else if (res.StatusCode == HttpStatusCode.NotFound)
                                 {
