@@ -99,7 +99,8 @@ namespace GoogleBaseLoc
         //private static string key = "AIzaSyDe705w27eoNvJp6gOVNx6MRav24hb8hhc";
         //private static string key = "AIzaSyD7qRLfpYPsY_cTGyuUmgeD8alT2M0457w";
         private static string[] keys = { "AIzaSyCTPP_vSZaC-HDygwlij12UbVLVwVqYzsI", "AIzaSyB32yWrWa5C11kt0XpHHS3V13NekRENzS4", "AIzaSyC8vvERhzfR-HwI6hR_wqatVy5NSfwAxAk", "AIzaSyCgWuezqquuwt1TzEO2IjCZOL9TGtEOOp8" , "AIzaSyDVPpVM4nNYWhGfYQtc574Qfrk6ixGYD0k" , "AIzaSyCGfsA1u-9GiKfYWZCjTAkp1XZzFrtTp0Y" , "AIzaSyDe705w27eoNvJp6gOVNx6MRav24hb8hhc", "AIzaSyD7qRLfpYPsY_cTGyuUmgeD8alT2M0457w",
-        "AIzaSyDEyq1Kw77pNb5uvZIpoyLmxmcAROO1NW8", "AIzaSyD0o9VxqGInY1g8bhifouw5quFm9q3J4do", "AIzaSyB3qC6aF5Rl7H32GT_lCHH6vbYNaY6kjio", "AIzaSyAESwcwYREqeCLbTUju0gY1Y_WSQAQlTTg", "AIzaSyACawcyKsUOI_SktQ8rVdk4SWZTt-YCO5w", " AIzaSyB1Je0Zu_328gxrKrSjfSRKDO6t2ZfDzXM", "AIzaSyA6zGS5zPVOG2CfIcz4Bu_NPeKRrLnFtrQ", "AIzaSyBYcUNDut2f_b1oaXhj_0-0EstEFJbIM2o" };
+        "AIzaSyDEyq1Kw77pNb5uvZIpoyLmxmcAROO1NW8", "AIzaSyD0o9VxqGInY1g8bhifouw5quFm9q3J4do", "AIzaSyB3qC6aF5Rl7H32GT_lCHH6vbYNaY6kjio", "AIzaSyAESwcwYREqeCLbTUju0gY1Y_WSQAQlTTg", "AIzaSyACawcyKsUOI_SktQ8rVdk4SWZTt-YCO5w", " AIzaSyB1Je0Zu_328gxrKrSjfSRKDO6t2ZfDzXM", "AIzaSyA6zGS5zPVOG2CfIcz4Bu_NPeKRrLnFtrQ", "AIzaSyBYcUNDut2f_b1oaXhj_0-0EstEFJbIM2o",
+        "AIzaSyCIcGu27bZuZY1Qs7Qu1YmUnlFqxFA_9EM", "AIzaSyD8Wq7DnwK3r7AqWM5LFOgJhwc5LUkBJHw", "AIzaSyCsXPrIG5hU2OtBD4nGJ9xEAT74k-pNHBs", "AIzaSyBMSF3azviu0qBpmDKqUkowQcsZe2NKk24", "AIzaSyBZ0H-gDJmwOc2x3XBWz2JVBz_okryzsx4", "AIzaSyBmSMzonZoyDC-QogAu_8W0OSPTJJ32W60", "AIzaSyBo4-KQJUSHpoMeyMgUDtNKtcMe70apcQQ", "AIzaSyDw1YMqyytHiB851szytw5RcrRhywMlIYQ"};
         private static int keypos = 0;
 
         static void Main(string[] args)
@@ -160,7 +161,7 @@ namespace GoogleBaseLoc
                                 stream.Close();
                             }
                             catch (Exception e) { Console.WriteLine(e.Message); continue; }
-                            bool tag = true;
+                            bool tag = true, nolog = false;
                             double lat = 0, lon = 0, accuracy = 0;
                             try
                             {
@@ -179,6 +180,7 @@ namespace GoogleBaseLoc
                                 {
                                     Console.WriteLine("No quota. Move to next key.");
                                     keypos++;
+                                    nolog = true;
                                     if (keypos == keys.Length)
                                     {
                                         Console.WriteLine("All keys invalid.");
@@ -195,8 +197,11 @@ namespace GoogleBaseLoc
                                 try { res.Close(); } catch (Exception) { }
                             }
                             catch (Exception e) { Console.WriteLine(e.Message); try { res.Close(); } catch (Exception) { } continue; }
-                            cmd = new MySqlCommand("INSERT INTO googlebs(id,tag,lon,lat,accuracy) VALUES('" + bs.id + "'," + tag + "," + lon + "," + lat + "," + accuracy + "0)", conn);
-                            cmd.ExecuteScalar();
+                            if (!nolog)
+                            {
+                                cmd = new MySqlCommand("INSERT INTO googlebs(id,tag,lon,lat,accuracy) VALUES('" + bs.id + "'," + tag + "," + lon + "," + lat + "," + accuracy + "0)", conn);
+                                cmd.ExecuteScalar();
+                            }
                             Console.WriteLine(lon + " " + lat + " " + accuracy);
                         }
                     }
