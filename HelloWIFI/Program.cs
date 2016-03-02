@@ -12,37 +12,37 @@ namespace HelloWIFI
 {
     [DataContract] class WifiQuery
     {
-        [DataMember] public BaiduWifiClustering wifi;
-        [DataMember] public int line;
-        [DataMember] public string function;
-        [DataMember] public bool isAuthority;
-        [DataMember] public WifiRecord[] wf;
-        [DataMember(Name = "base")] public BaseStationRecord[] bs;
+        [DataMember] public BaiduWifiClustering wifi;               //百度聚类的结果
+        [DataMember] public int line;                               //原始记录当中的行号
+        [DataMember] public string function;                        //根据短信内容的分类 good cheat spam
+        [DataMember] public bool isAuthority;                       //是否来自权威号
+        [DataMember] public WifiRecord[] wf;                        //wifi记录
+        [DataMember(Name = "base")] public BaseStationRecord[] bs;  //最近连接的基站记录
     };
     [DataContract] class BaiduWifiClustering
     {
-        [DataMember] public bool exist;
-        [DataMember] public double lon;
-        [DataMember] public double lat;
+        [DataMember] public bool exist;     //是否确定了位置
+        [DataMember] public double lon;     //经度
+        [DataMember] public double lat;     //纬度
     };
     [DataContract] class WifiRecord
     {
-        [DataMember] public string wifi;
-        [DataMember] public double distance;
-        [DataMember] public double lon;
-        [DataMember] public double lat;
-        [DataMember] public bool tag;
+        [DataMember] public string wifi;        //mac地址
+        [DataMember] public double distance;    //与百度聚类结果之间的距离（米）
+        [DataMember] public double lon;         //经度
+        [DataMember] public double lat;         //纬度
+        [DataMember] public bool tag;           //是否查到了位置
     };
     [DataContract] class BaseStationRecord
     {
-        [DataMember] public string id;
-        [DataMember] public double cellStrength;
-        [DataMember] public bool legal;
-        [DataMember] public double lon;
-        [DataMember] public double lat;
-        [DataMember] public double radius;
-        [DataMember] public bool tag;
-        [DataMember] public long time;
+        [DataMember] public string id;          //基站id，MCC|MNC|LAC|CID
+        [DataMember] public double cellStrength;//信号强度
+        [DataMember] public bool legal;         //id语法是否正确
+        [DataMember] public double lon;         //经度
+        [DataMember] public double lat;         //纬度
+        [DataMember] public double radius;      //基站覆盖半径或误差范围？
+        [DataMember] public bool tag;           //是否查到了位置
+        [DataMember] public long time;          //连接到此基站的时间，最大的为当前
     };
 
     class OccurenceCounter<TKey>
@@ -87,7 +87,7 @@ namespace HelloWIFI
             var sw = new Stopwatch();
             sw.Start();
             var ser = new DataContractJsonSerializer(typeof(WifiQuery));
-            using (var fs = new StreamReader("D:\\wifi\\wifiQuery.dat")) {
+            using (var fs = new StreamReader("D:\\wifi\\wifiQuery1.dat")) {
                 while (!fs.EndOfStream)
                 {
                     var line = fs.ReadLine();
