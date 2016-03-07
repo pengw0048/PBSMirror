@@ -92,7 +92,7 @@ namespace Visualize
         private void Form1_Load(object sender, EventArgs e)
         {
             openFileDialog1.ShowDialog();
-            if (openFileDialog1.FileName == "") sr = new StreamReader("D:\\wifi\\wifiQuery1.dat");
+            if (openFileDialog1.FileName == "") sr = new StreamReader("D:\\wifi\\wifiQuery2.dat");
             else sr = new StreamReader(openFileDialog1.FileName);
             Form1_Resize(null, null);
             showpage = File.ReadAllText("../../1.htm");
@@ -164,10 +164,17 @@ namespace Visualize
                 lons.Add(wifi.lon);
                 lats.Add(wifi.lat);
             }
-            foreach (var bs in query.gbase.Length > 0 ? query.gbase : query.bs)
+            foreach (var bs in query.bs)
             {
                 if (bs.tag == false) continue;
                 ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon});map.addOverlay(marker);\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString());
+                lons.Add(bs.lon);
+                lats.Add(bs.lat);
+            }
+            foreach (var bs in query.gbase)
+            {
+                if (bs.tag == false) continue;
+                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon2});map.addOverlay(marker);\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString());
                 lons.Add(bs.lon);
                 lats.Add(bs.lat);
             }

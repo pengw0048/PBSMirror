@@ -157,7 +157,7 @@ namespace Validation1
                         if (!first) tline += ",";
                         first = false;
                         var pos = google.query(bs.id);
-                        tline += "{\"id\":\"" + bs.id + "\",\"tag\":" + bs.tag.ToString().ToLower() + ",\"lat\":" + pos.lat + ",\"lon\":" + pos.lon + ",\"radius\":" + pos.accuracy + "}";
+                        tline += "{\"id\":\"" + bs.id + "\",\"tag\":" + pos.tag.ToString().ToLower() + ",\"lat\":" + pos.lat + ",\"lon\":" + pos.lon + ",\"radius\":" + pos.accuracy + "}";
                     }
                     tline += "]}";
                     if (FraudFromAuth && DistanceInvalid) { out1.WriteLine(tline); Invalid1++; }
