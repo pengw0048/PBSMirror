@@ -114,7 +114,7 @@ namespace Validation1
             sw.Start();
             int FraudFromAuthCount = 0, DistanceInvalidCount = 0, Invalid1 = 0;
             var ser = new DataContractJsonSerializer(typeof(WifiQuery));
-            using (var fs = new StreamReader("D:\\wifi\\wifiQuery1.dat"))
+            using (var fs = new StreamReader("D:\\wifi\\wifiQuery2.dat"))
             using (var out1 = new StreamWriter("invalid1.log"))
             {
                 while (!fs.EndOfStream)
@@ -150,17 +150,7 @@ namespace Validation1
                         FraudFromAuthCount++;
                         FraudFromAuth = true;
                     }
-                    var tline = line.Substring(0, line.Length - 1)+",\"gbase\":[";
-                    bool first = true;
-                    foreach (var bs in query.bs)
-                    {
-                        if (!first) tline += ",";
-                        first = false;
-                        var pos = google.query(bs.id);
-                        tline += "{\"id\":\"" + bs.id + "\",\"tag\":" + pos.tag.ToString().ToLower() + ",\"lat\":" + pos.lat + ",\"lon\":" + pos.lon + ",\"radius\":" + pos.accuracy + "}";
-                    }
-                    tline += "]}";
-                    if (FraudFromAuth && DistanceInvalid) { out1.WriteLine(tline); Invalid1++; }
+                    if (FraudFromAuth && DistanceInvalid) { out1.WriteLine(line); Invalid1++; }
                 }
             }
             sw.Stop();
