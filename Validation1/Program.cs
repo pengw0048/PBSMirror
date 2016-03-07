@@ -150,7 +150,17 @@ namespace Validation1
                         FraudFromAuthCount++;
                         FraudFromAuth = true;
                     }
-                    if (FraudFromAuth && DistanceInvalid) { out1.WriteLine(line); Invalid1++; }
+                    var tline = line.Substring(0, line.Length - 1)+",\"gbase\":[";
+                    bool first = true;
+                    foreach (var bs in query.bs)
+                    {
+                        if (!first) tline += ",";
+                        first = false;
+                        var pos = google.query(bs.id);
+                        tline += "{\"id\":\"" + bs.id + "\",\"tag\":" + bs.tag.ToString().ToLower() + ",\"lat\":" + pos.lat + ",\"lon\":" + pos.lon + ",\"radius\":" + pos.accuracy + "}";
+                    }
+                    tline += "]}";
+                    if (FraudFromAuth && DistanceInvalid) { out1.WriteLine(tline); Invalid1++; }
                 }
             }
             sw.Stop();

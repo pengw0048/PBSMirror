@@ -21,7 +21,7 @@ namespace Visualize
         class WifiQuery
         {
             [DataMember]
-            public BaiduWifiClustering wifi;               //百度聚类的结果
+            public Position wifi;               //百度聚类的结果
             [DataMember]
             public int line;                               //原始记录当中的行号
             [DataMember]
@@ -32,9 +32,11 @@ namespace Visualize
             public WifiRecord[] wf;                        //wifi记录
             [DataMember(Name = "base")]
             public BaseStationRecord[] bs;  //最近连接的基站记录
+            [DataMember]
+            public BaseStationRecord[] gbase;  //google查询的的基站记录
         };
         [DataContract]
-        class BaiduWifiClustering
+        class Position
         {
             [DataMember]
             public bool tag;       //是否确定了位置
@@ -89,7 +91,9 @@ namespace Visualize
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            sr = new StreamReader("D:\\wifi\\wifiQuery1.dat");
+            openFileDialog1.ShowDialog();
+            if (openFileDialog1.FileName == "") sr = new StreamReader("D:\\wifi\\wifiQuery1.dat");
+            else sr = new StreamReader(openFileDialog1.FileName);
             Form1_Resize(null, null);
             showpage = File.ReadAllText("../../1.htm");
         }
@@ -160,7 +164,7 @@ namespace Visualize
                 lons.Add(wifi.lon);
                 lats.Add(wifi.lat);
             }
-            foreach (var bs in query.bs)
+            foreach (var bs in query.gbase.Length > 0 ? query.gbase : query.bs)
             {
                 if (bs.tag == false) continue;
                 ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon});map.addOverlay(marker);\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString());
