@@ -21,7 +21,7 @@ namespace HelloWIFI
     };
     [DataContract] class BaiduWifiClustering
     {
-        [DataMember] public bool exist;     //是否确定了位置
+        [DataMember] public bool tag;     //是否确定了位置
         [DataMember] public double lon;     //经度
         [DataMember] public double lat;     //纬度
     };

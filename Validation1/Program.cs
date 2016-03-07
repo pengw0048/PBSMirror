@@ -13,18 +13,19 @@ namespace Validation1
 {
     [DataContract] class WifiQuery
     {
-        [DataMember] public BaiduWifiClustering wifi;               //百度聚类的结果
+        [DataMember] public Position wifi;               //百度聚类的结果
         [DataMember] public int line;                               //原始记录当中的行号
         [DataMember] public string function;                        //根据短信内容的分类 good cheat spam
         [DataMember] public bool isAuthority;                       //是否来自权威号
         [DataMember] public WifiRecord[] wf;                        //wifi记录
         [DataMember(Name = "base")] public BaseStationRecord[] bs;  //最近连接的基站记录
     };
-    [DataContract] class BaiduWifiClustering
+    [DataContract] class Position
     {
         [DataMember] public bool tag;       //是否确定了位置
         [DataMember] public double lon;     //经度
         [DataMember] public double lat;     //纬度
+        [DataMember] public double accuracy;
     };
     [DataContract] class WifiRecord
     {
@@ -72,6 +73,31 @@ namespace Validation1
         }
     }
 
+    class GoogleBaseLoc
+    {
+        private Dictionary<string, Position> dict;
+        public GoogleBaseLoc()
+        {
+            dict = new Dictionary<string, Position>();
+            using(var sr=new StreamReader("D:\\wifi\\google.dat"))
+                while (!sr.EndOfStream)
+                {
+                    string[] ts = sr.ReadLine().Split('\t');
+                    if (ts.Length != 6) continue;
+                    if (ts[1] != "1") continue;
+                    var pos = new Position() { tag = true, lon = double.Parse(ts[2]), lat = double.Parse(ts[3]), accuracy = double.Parse(ts[4]) };
+                    dict.Add(ts[0].Trim(), pos);
+                }
+            Console.WriteLine("Google base station record loaded, " + dict.Count + " records.");
+        }
+        public Position query(string id)
+        {
+            if (!dict.ContainsKey(id))
+                return new Position() { tag = false };
+            return dict[id];
+        }
+    }
+
     class Program
     {
         static double distance(double sLatitude, double sLongitude, double eLatitude, double eLongitude)
@@ -83,6 +109,7 @@ namespace Validation1
 
         static void Main(string[] args)
         {
+            var google = new GoogleBaseLoc();
             var sw = new Stopwatch();
             sw.Start();
             int FraudFromAuthCount = 0, DistanceInvalidCount = 0, Invalid1 = 0;
@@ -109,11 +136,10 @@ namespace Validation1
                     {
                         foreach (var bs in query.bs)
                         {
-                            if (bs.tag == true && distance(bs.lat, bs.lon, query.wifi.lat, query.wifi.lon) > 10000)
+                            var pos = google.query(bs.id);
+                            if (pos.tag == true && distance(pos.lat, pos.lon, query.wifi.lat, query.wifi.lon) > 10000)
                             {
-                                //Console.WriteLine(line);
                                 DistanceInvalidCount++;
-                                //Console.ReadLine();
                                 DistanceInvalid = true;
                             }
                         }
@@ -121,9 +147,7 @@ namespace Validation1
                     bool FraudFromAuth = false;
                     if ((query.function == "cheat" || query.function == "spam") && query.isAuthority == true)
                     {
-                        //Console.WriteLine(line);
                         FraudFromAuthCount++;
-                        //Console.ReadLine();
                         FraudFromAuth = true;
                     }
                     if (FraudFromAuth && DistanceInvalid) { out1.WriteLine(line); Invalid1++; }
