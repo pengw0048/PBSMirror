@@ -164,17 +164,19 @@ namespace Visualize
                 lons.Add(wifi.lon);
                 lats.Add(wifi.lat);
             }
+            int ti = 0;
             foreach (var bs in query.bs)
             {
                 if (bs.tag == false) continue;
-                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon});map.addOverlay(marker);\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString());
+                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon});map.addOverlay(marker);marker.setLabel(new BMap.Label(\"{ti}\",{offset:new BMap.Size(20,-10)}));\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString()).Replace("{ti}", (++ti).ToString());
                 lons.Add(bs.lon);
                 lats.Add(bs.lat);
             }
+            ti = 0;
             foreach (var bs in query.gbase)
             {
                 if (bs.tag == false) continue;
-                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon2});map.addOverlay(marker);\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString());
+                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon2});map.addOverlay(marker);marker.setLabel(new BMap.Label(\"{ti}\",{offset:new BMap.Size(20,-10)}));\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString()).Replace("{ti}", (++ti).ToString());
                 lons.Add(bs.lon);
                 lats.Add(bs.lat);
             }
