@@ -19,6 +19,7 @@ namespace Validation1
         [DataMember] public bool isAuthority;                       //是否来自权威号
         [DataMember] public WifiRecord[] wf;                        //wifi记录
         [DataMember(Name = "base")] public BaseStationRecord[] bs;  //最近连接的基站记录
+        [DataMember] public BaseStationRecord[] gbase;
     };
     [DataContract] class Position
     {
@@ -26,6 +27,11 @@ namespace Validation1
         [DataMember] public double lon;     //经度
         [DataMember] public double lat;     //纬度
         [DataMember] public double accuracy;
+        [DataMember] public long time;
+        static public implicit operator Position(BaseStationRecord bs)
+        {
+            return new Position() { tag = bs.tag, lon = bs.lon, lat = bs.lat, accuracy = bs.radius, time = bs.time };
+        }
     };
     [DataContract] class WifiRecord
     {
@@ -100,19 +106,32 @@ namespace Validation1
 
     class Program
     {
-        static double distance(double sLatitude, double sLongitude, double eLatitude, double eLongitude)
+        static double Distance(double sLatitude, double sLongitude, double eLatitude, double eLongitude)
         {
             var sCoord = new GeoCoordinate(sLatitude, sLongitude);
             var eCoord = new GeoCoordinate(eLatitude, eLongitude);
             return sCoord.GetDistanceTo(eCoord);
         }
 
+        static double Distance(Position s, Position e)
+        {
+            return Distance(s.lat, s.lon, e.lat, e.lon);
+        }
+
+        static double Speed(Position s, Position e)
+        {
+            double dist = Distance(e, s);
+            dist -= s.accuracy + e.accuracy;
+            if (dist < 0) dist = 0;
+            return Math.Abs(dist / ((e.time - s.time) / 1000.0));
+        }
+
         static void Main(string[] args)
         {
-            var google = new GoogleBaseLoc();
+            //var google = new GoogleBaseLoc();
             var sw = new Stopwatch();
             sw.Start();
-            int FraudFromAuthCount = 0, DistanceInvalidCount = 0, Invalid1 = 0;
+            int FraudFromAuthCount = 0, DistanceInvalidCount = 0, Invalid1 = 0, FastSwitchCount = 0;
             var ser = new DataContractJsonSerializer(typeof(WifiQuery));
             using (var fs = new StreamReader("D:\\wifi\\wifiQuery2.dat"))
             using (var out1 = new StreamWriter("invalid1.log"))
@@ -131,32 +150,50 @@ namespace Validation1
                             Console.WriteLine(e.Message);
                             continue;
                         }
+                    for (int i = 0; i < query.bs.Length; i++) query.gbase[i].time = query.bs[i].time;
+                    //检查聚类结果和基站位置是否相符
                     bool DistanceInvalid = false;
                     if (query.wifi.tag == true)
                     {
-                        foreach (var bs in query.bs)
+                        foreach (var bs in query.gbase)
                         {
-                            var pos = google.query(bs.id);
-                            if (pos.tag == true && distance(pos.lat, pos.lon, query.wifi.lat, query.wifi.lon) > 10000)
+                            if (bs.tag == true && Distance(bs.lat, bs.lon, query.wifi.lat, query.wifi.lon) > 20000)
                             {
                                 DistanceInvalidCount++;
                                 DistanceInvalid = true;
+                                break;
                             }
                         }
                     }
+                    //是否内容不正常但来自权威号
                     bool FraudFromAuth = false;
                     if ((query.function == "cheat" || query.function == "spam") && query.isAuthority == true)
                     {
                         FraudFromAuthCount++;
                         FraudFromAuth = true;
                     }
-                    if (FraudFromAuth && DistanceInvalid) { out1.WriteLine(line); Invalid1++; }
+                    //是否基站切换速度过快
+                    bool FastSwitch = false;
+                    if (query.gbase.Length >= 2 && query.gbase[0].tag && query.gbase[1].tag)
+                    {
+                        double speed1 = Speed(query.gbase[0], query.gbase[1]);
+                        double speed2 = Speed(query.bs[0], query.bs[1]);
+                        if (!double.IsInfinity(speed1) && speed1 >= 100) { FastSwitch = true; FastSwitchCount++; }
+                    }
+                    if (FastSwitch == false && query.gbase.Length >= 3 && query.gbase[2].tag && query.gbase[1].tag)
+                    {
+                        double speed1 = Speed(query.gbase[1], query.gbase[2]);
+                        double speed2 = Speed(query.bs[1], query.bs[2]);
+                        if (!double.IsInfinity(speed1) && speed1 >= 100) { FastSwitch = true; FastSwitchCount++; }
+                    }
+                    if (FastSwitch) { out1.WriteLine(line); Invalid1++; }
                 }
             }
             sw.Stop();
             Console.WriteLine("Elapsed time: " + sw.ElapsedMilliseconds + " ms");
             Console.WriteLine("Fraud from authority: " + FraudFromAuthCount);
             Console.WriteLine("Distance invalid: " + DistanceInvalidCount);
+            Console.WriteLine("BS handover too fast: " + FastSwitchCount);
             Console.WriteLine("Invalid1: " + Invalid1);
             Console.WriteLine("---Done---");
             Console.ReadLine();
