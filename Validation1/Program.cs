@@ -131,7 +131,7 @@ namespace Validation1
             //var google = new GoogleBaseLoc();
             var sw = new Stopwatch();
             sw.Start();
-            int FraudFromAuthCount = 0, DistanceInvalidCount = 0, Invalid1 = 0, FastSwitchCount = 0;
+            int FraudFromAuthCount = 0, DistanceInvalidCount = 0, Invalid1 = 0, FastSwitchCount = 0, ToIllegalBSCount = 0;
             var ser = new DataContractJsonSerializer(typeof(WifiQuery));
             using (var fs = new StreamReader("D:\\wifi\\wifiQuery2.dat"))
             using (var out1 = new StreamWriter("invalid1.log"))
@@ -186,7 +186,15 @@ namespace Validation1
                         double speed2 = Speed(query.bs[1], query.bs[2]);
                         if (!double.IsInfinity(speed1) && speed1 >= 100) { FastSwitch = true; FastSwitchCount++; }
                     }
-                    if (FastSwitch) { out1.WriteLine(line); Invalid1++; }
+                    //是否切换到了语法错误、查询不到的基站
+                    bool ToIllegalBS = false;
+                    int bl = query.bs.Length - 1;
+                    if (bl >= 1 && (query.bs[bl - 1].tag || query.gbase[bl - 1].tag) && (!query.bs[bl].tag && !query.gbase[bl].tag)/* && !query.bs[bl].legal*/)
+                    {
+                        ToIllegalBS = true;
+                        ToIllegalBSCount++;
+                    }
+                    if (ToIllegalBS) { out1.WriteLine(line); Invalid1++; }
                 }
             }
             sw.Stop();
@@ -194,6 +202,7 @@ namespace Validation1
             Console.WriteLine("Fraud from authority: " + FraudFromAuthCount);
             Console.WriteLine("Distance invalid: " + DistanceInvalidCount);
             Console.WriteLine("BS handover too fast: " + FastSwitchCount);
+            Console.WriteLine("Switch to illegal BS: " + ToIllegalBSCount);
             Console.WriteLine("Invalid1: " + Invalid1);
             Console.WriteLine("---Done---");
             Console.ReadLine();
