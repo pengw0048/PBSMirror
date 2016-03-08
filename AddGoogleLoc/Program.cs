@@ -86,6 +86,7 @@ namespace AddGoogleLoc
                     if (ts.Length != 6) continue;
                     if (ts[1] != "1") continue;
                     var pos = new Position() { tag = true, lon = double.Parse(ts[2]), lat = double.Parse(ts[3]), accuracy = double.Parse(ts[4]) };
+                    if (pos.lon == 0 || pos.lat == 0) pos.tag = false;
                     dict.Add(ts[0].Trim(), pos);
                 }
             Console.WriteLine("Google base station record loaded, " + dict.Count + " records.");

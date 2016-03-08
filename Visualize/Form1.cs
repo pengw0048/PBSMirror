@@ -44,6 +44,14 @@ namespace Visualize
             public double lon;     //经度
             [DataMember]
             public double lat;     //纬度
+            [DataMember]
+            public double accuracy;
+            [DataMember]
+            public long time;
+            static public implicit operator Position(BaseStationRecord bs)
+            {
+                return new Position() { tag = bs.tag, lon = bs.lon, lat = bs.lat, accuracy = bs.radius, time = bs.time };
+            }
         };
         [DataContract]
         class WifiRecord
@@ -96,6 +104,9 @@ namespace Visualize
             else sr = new StreamReader(openFileDialog1.FileName);
             Form1_Resize(null, null);
             showpage = File.ReadAllText("../../1.htm");
+            this.WindowState = FormWindowState.Minimized;
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
         }
         private static string ConvertJsonString(string str)
         {
@@ -142,8 +153,13 @@ namespace Visualize
                     {
                         textBox1.Text += ex.Message + "\r\n";
                     }
+                for (int i = 0; i < query.bs.Length; i++) query.gbase[i].time = query.bs[i].time;
                 HasBs = false;
                 foreach (var bs in query.bs)
+                {
+                    if (bs.tag) HasBs = true;
+                }
+                foreach (var bs in query.gbase)
                 {
                     if (bs.tag) HasBs = true;
                 }
@@ -165,18 +181,24 @@ namespace Visualize
                 lats.Add(wifi.lat);
             }
             int ti = 0;
+            long firsttime = -1;
             foreach (var bs in query.bs)
             {
+                ti++;
                 if (bs.tag == false) continue;
-                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon});map.addOverlay(marker);marker.setLabel(new BMap.Label(\"{ti}\",{offset:new BMap.Size(20,-10)}));\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString()).Replace("{ti}", (++ti).ToString());
+                if (firsttime == -1) firsttime = bs.time;
+                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon});map.addOverlay(marker);marker.setLabel(new BMap.Label(\"{ti}\",{offset:new BMap.Size(20,-10)}));\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString()).Replace("{ti}", ti.ToString() + (firsttime == bs.time ? "" : ("," + (bs.time - firsttime) / 1000 + "s")));
                 lons.Add(bs.lon);
                 lats.Add(bs.lat);
             }
             ti = 0;
+            firsttime = -1;
             foreach (var bs in query.gbase)
             {
+                ti++;
                 if (bs.tag == false) continue;
-                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon2});map.addOverlay(marker);marker.setLabel(new BMap.Label(\"{ti}\",{offset:new BMap.Size(20,-10)}));\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString()).Replace("{ti}", (++ti).ToString());
+                if (firsttime == -1) firsttime = bs.time;
+                ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:bsIcon2});map.addOverlay(marker);marker.setLabel(new BMap.Label(\"{ti}\",{offset:new BMap.Size(20,-10)}));\r\n".Replace("{lon}", bs.lon.ToString()).Replace("{lat}", bs.lat.ToString()).Replace("{ti}", ti.ToString() + (firsttime == bs.time ? "" : ("," + (bs.time - firsttime) / 1000 + "s")));
                 lons.Add(bs.lon);
                 lats.Add(bs.lat);
             }
