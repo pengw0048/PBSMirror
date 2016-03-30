@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
+using System.Device.Location;
+using System;
 
 namespace PBSUtil
 { 
@@ -108,6 +110,41 @@ namespace PBSUtil
                 first = false;
             }
             return ret;
+        }
+    }
+    /// <summary> 提供对地图相关操作的类，不能实例化 </summary>
+    public static class Map
+    {
+        /// <summary> 计算地球上两点间的球面距离 </summary>
+        /// <param name='sLatitude'> 起点的纬度 </param>
+        /// <param name='sLongitude'> 起点的经度 </param>
+        /// <param name='eLatitude'> 终点的纬度 </param>
+        /// <param name='eLongitude'> 终点的经度 </param>
+        /// <returns> 所给两点之间的距离，单位为米 </returns>
+        public static double Distance(double sLatitude, double sLongitude, double eLatitude, double eLongitude)
+        {
+            var sCoord = new GeoCoordinate(sLatitude, sLongitude);
+            var eCoord = new GeoCoordinate(eLatitude, eLongitude);
+            return sCoord.GetDistanceTo(eCoord);
+        }
+        /// <summary> 计算地球上两点间的球面距离 </summary>
+        /// <param name='s'> 起点 </param>
+        /// <param name='e'> 终点 </param>
+        /// <returns> 所给两点之间的距离，单位为米 </returns>
+        public static double Distance(Position s, Position e)
+        {
+            return Distance(s.lat, s.lon, e.lat, e.lon);
+        }
+        /// <summary> 计算指定了时间的两点间的移动速度 </summary>
+        /// <param name='s'> 起点 </param>
+        /// <param name='e'> 终点 </param>
+        /// <returns> 移动速度，单位为米每秒 </returns>
+        public static double Speed(Position s, Position e)
+        {
+            double dist = Distance(e, s);
+            dist -= s.accuracy + e.accuracy;
+            if (dist < 0) dist = 0;
+            return Math.Abs(dist / ((e.time - s.time) / 1000.0));
         }
     }
 }

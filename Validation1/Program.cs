@@ -12,26 +12,6 @@ namespace Validation1
 {
     class Program
     {
-        static double Distance(double sLatitude, double sLongitude, double eLatitude, double eLongitude)
-        {
-            var sCoord = new GeoCoordinate(sLatitude, sLongitude);
-            var eCoord = new GeoCoordinate(eLatitude, eLongitude);
-            return sCoord.GetDistanceTo(eCoord);
-        }
-
-        static double Distance(Position s, Position e)
-        {
-            return Distance(s.lat, s.lon, e.lat, e.lon);
-        }
-
-        static double Speed(Position s, Position e)
-        {
-            double dist = Distance(e, s);
-            dist -= s.accuracy + e.accuracy;
-            if (dist < 0) dist = 0;
-            return Math.Abs(dist / ((e.time - s.time) / 1000.0));
-        }
-
         static void Main(string[] args)
         {
             var sw = new Stopwatch();
@@ -62,7 +42,7 @@ namespace Validation1
                     {
                         foreach (var bs in query.gbase)
                         {
-                            if (bs.tag == true && Distance(bs.lat, bs.lon, query.wifi.lat, query.wifi.lon) > 20000)
+                            if (bs.tag == true && Map.Distance(bs.lat, bs.lon, query.wifi.lat, query.wifi.lon) > 20000)
                             {
                                 DistanceInvalidCount++;
                                 DistanceInvalid = true;
@@ -81,14 +61,14 @@ namespace Validation1
                     bool FastSwitch = false;
                     if (query.gbase.Length >= 2 && query.gbase[0].tag && query.gbase[1].tag)
                     {
-                        double speed1 = Speed(query.gbase[0], query.gbase[1]);
-                        double speed2 = Speed(query.bs[0], query.bs[1]);
+                        double speed1 = Map.Speed(query.gbase[0], query.gbase[1]);
+                        double speed2 = Map.Speed(query.bs[0], query.bs[1]);
                         if (!double.IsInfinity(speed1) && speed1 >= 100) { FastSwitch = true; FastSwitchCount++; }
                     }
                     if (FastSwitch == false && query.gbase.Length >= 3 && query.gbase[2].tag && query.gbase[1].tag)
                     {
-                        double speed1 = Speed(query.gbase[1], query.gbase[2]);
-                        double speed2 = Speed(query.bs[1], query.bs[2]);
+                        double speed1 = Map.Speed(query.gbase[1], query.gbase[2]);
+                        double speed2 = Map.Speed(query.bs[1], query.bs[2]);
                         if (!double.IsInfinity(speed1) && speed1 >= 100) { FastSwitch = true; FastSwitchCount++; }
                     }
                     //是否切换到了语法错误、查询不到的基站
