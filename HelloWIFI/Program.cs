@@ -26,7 +26,9 @@ namespace HelloWIFI
             var sw = new Stopwatch();
             sw.Start();
             var ser = new DataContractJsonSerializer(typeof(WifiQuery));
-            using (var fs = new StreamReader("D:\\wifi\\wifiQuery2.dat")) {
+            using (var fout = new StreamWriter("D:\\wifi\\dist.dat"))
+            using (var fs = new StreamReader("D:\\wifi\\wifiQuery2.dat"))
+            {
                 while (!fs.EndOfStream)
                 {
                     var line = fs.ReadLine();
@@ -63,6 +65,15 @@ namespace HelloWIFI
                     foreach (var wf in query.wf)
                     {
                         wifioccur.add(wf.wifi);
+                    }
+                    foreach (var bs in query.bs)
+                    {
+                        if (!bs.tag) continue;
+                        foreach (var wf in query.wf)
+                        {
+                            if (!wf.tag) continue;
+                            fout.WriteLine(Map.Distance(bs, wf));
+                        }
                     }
                 }
             }

@@ -16,6 +16,7 @@ namespace Validation1
         {
             var sw = new Stopwatch();
             sw.Start();
+            var apdict = new Dictionary<string, WifiAP>();
             int FraudFromAuthCount = 0, DistanceInvalidCount = 0, Invalid1 = 0, FastSwitchCount = 0, ToIllegalBSCount = 0;
             var ser = new DataContractJsonSerializer(typeof(WifiQuery));
             using (var fs = new StreamReader("D:\\wifi\\wifiQuery2.dat"))
