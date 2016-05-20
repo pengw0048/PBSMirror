@@ -218,6 +218,48 @@ namespace Visualize
             webBrowser1.Width = this.Size.Width - 280;
             textBox1.Height = this.Size.Height - 90;
             button1.Location = new Point(button1.Location.X, textBox1.Location.Y + textBox1.Height + 5);
+            button2.Location = new Point(button2.Location.X, textBox1.Location.Y + textBox1.Height + 5);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var ser = new DataContractJsonSerializer(typeof(WifiQuery));
+                string ts = "";
+            string points = "";
+            var r = new Random();
+            int count = 0;
+            string line;
+            while(!sr.EndOfStream)
+            {
+                WifiQuery query = null;
+                this.line++;
+                line = sr.ReadLine();
+                using (var ms = new MemoryStream(Encoding.ASCII.GetBytes(line)))
+                    try
+                    {
+                        query = (WifiQuery)ser.ReadObject(ms);
+                    }
+                    catch (Exception ex)
+                    {
+                        textBox1.Text += ex.Message + "\r\n";
+                    }
+                if (query.wifi.lon>116.00&& query.wifi.lon<116.99&& query.wifi.lat > 39.70 && query.wifi.lat < 40.30 && r.NextDouble()>0.7)
+                {
+                    ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:blue});map.addOverlay(marker);\r\n".Replace("{lon}", query.wifi.lon.ToString()).Replace("{lat}", query.wifi.lat.ToString());
+                    count++;
+                }
+            }
+                List<double> lons = new List<double>(), lats = new List<double>();
+            lons.Add(116.400244); lats.Add(39.92556);
+            for (int i = 0; i < lons.Count; i++)
+                {
+                    if (i > 0) points += ",";
+                    points += "new BMap.Point(" + lons[i] + "," + lats[i] + ")";
+                }
+            //webBrowser1.DocumentText = showpage.Replace("{ts}", ts).Replace("{points}", points);
+            using (var sw = new StreamWriter("out.html"))
+                sw.WriteLine(showpage.Replace("{ts}", ts).Replace("{points}", points));
+            textBox1.Text = count+"";
         }
     }
     

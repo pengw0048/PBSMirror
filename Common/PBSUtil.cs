@@ -190,8 +190,8 @@ namespace PBSUtil
             bs = new List<BSRecord>();
         }
     };
-    /// <summary> 提供对地图相关操作的类，不能实例化 </summary>
-    public static class Map
+    /// <summary> 提供数学计算的类，不能实例化 </summary>
+    public static class MMath
     {
         /// <summary> 计算地球上两点间的球面距离 </summary>
         /// <param name='sLatitude'> 起点的纬度 </param>
@@ -220,9 +220,19 @@ namespace PBSUtil
         public static double Speed(Position s, Position e)
         {
             double dist = Distance(e, s);
-            dist -= s.accuracy + e.accuracy;
+            //dist -= s.accuracy + e.accuracy;
             if (dist < 0) dist = 0;
             return Math.Abs(dist / ((e.time - s.time) / 1000.0));
+        }
+        public static double Min(double a, double b)
+        {
+            if (a < b) return a;
+            return b;
+        }
+        public static double Max(double a,double b)
+        {
+            if (a > b) return a;
+            return b;
         }
     }
 }
