@@ -63,7 +63,7 @@ namespace Validation1
                             if (query.bs.Last().tag == true) md = MMath.Min(md, MMath.Distance(wifi, query.bs.Last()));
                             if (query.gbase.Last().tag == true) md = MMath.Min(md, MMath.Distance(wifi, query.gbase.Last()));
                         }
-                        if (md < 5000) { mustright1.WriteLine(line); mr1 = true; mrc1++; }
+                        if (md < 5000) { mustright1.WriteLine(query.line); mr1 = true; mrc1++; }
                     }
                     //must right 2
                     if ( query.gbase.Length == 3 && query.gbase[1].tag && query.gbase[2].tag)
@@ -73,7 +73,7 @@ namespace Validation1
                             if (mr1) mrc12++;
                             mrc2++;
                             mr1 = true;
-                            mustright2.WriteLine(line);
+                            mustright2.WriteLine(query.line);
                         }
                     }
                     //检查聚类结果和基站位置是否相符
@@ -111,7 +111,7 @@ namespace Validation1
                         FraudFromAuthCount++;
                         mwc1++;
                         FraudFromAuth = true;
-                        mustwrong1.WriteLine(line);
+                        mustwrong1.WriteLine(query.line);
                     }
                     if (FraudFromAuth) list2.Add(query.line);
                     //是否基站切换速度过快
@@ -165,7 +165,7 @@ namespace Validation1
                             {
                                 mwc2++;
                                 if (FraudFromAuth) mwc1++;
-                                mustwrong2.WriteLine(line);
+                                mustwrong2.WriteLine(query.line);
                             }
                         }
                     }

@@ -7,6 +7,7 @@ dataArray = textscan(fileID, formatSpec, 'Delimiter', delimiter, 'EmptyValue' ,N
 fclose(fileID);
 dist = dataArray{:, 1};
 clearvars filename delimiter formatSpec fileID dataArray ans;
+dist=dist(dist<10^7);
 
 
 %% »­¾àÀëÖ±·½Í¼
@@ -17,7 +18,7 @@ hold on
 box on
 [N,edges]=histcounts(log(dist),80);
 for i=1:size(N,2)
-    fill([exp(edges(i)),exp(edges(i+1)),exp(edges(i+1)),exp(edges(i))],[1,1,N(i),N(i)],'b')
+    fill([exp(edges(i)),exp(edges(i+1)),exp(edges(i+1)),exp(edges(i))],[1,1,N(i),N(i)],'w')
 end
 %set(gca,'yscale','log')
 set(gca,'xscale','log')
@@ -37,7 +38,7 @@ for i=1:100
     yl(i)=size(dist(dist<xl(i)),1);
 end
 yl=yl/size(dist,1);
-plot(xl,yl,'linewidth',2)
+plot(xl,yl,'k','linewidth',1)
 set(gca,'xscale','log')
 ylim=get(gca,'ylim');
 set(gca,'ylim',[0,1])

@@ -15,7 +15,7 @@ set(gcf,'position',[200,200,400,300])
 box on
 [N,edges]=histcounts(log(dist),80);
 for i=1:size(N,2)
-    fill([exp(edges(i)),exp(edges(i+1)),exp(edges(i+1)),exp(edges(i))],[1,1,N(i),N(i)],'b')
+    fill([exp(edges(i)),exp(edges(i+1)),exp(edges(i+1)),exp(edges(i))],[1,1,N(i),N(i)],'w')
 end
 set(gca,'yscale','log')
 set(gca,'xscale','log')

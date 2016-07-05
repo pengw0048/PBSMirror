@@ -223,12 +223,34 @@ namespace Visualize
 
         private void button2_Click(object sender, EventArgs e)
         {
+            bool[] mark = new bool[1000000];
+            bool choose = false;
+            openFileDialog1.FileName = "";
+            openFileDialog1.ShowDialog();
+            if (openFileDialog1.FileName != "")
+            {
+                choose = true;
+                using(var fs=new StreamReader(openFileDialog1.FileName))
+                {
+                    while (!fs.EndOfStream)
+                    {
+                        var st = fs.ReadLine();
+                        try
+                        {
+                            mark[int.Parse(st)] = true;
+                        }
+                        catch (Exception) { }
+                    }
+                }
+            }
+            
             var ser = new DataContractJsonSerializer(typeof(WifiQuery));
                 string ts = "";
             string points = "";
             var r = new Random();
             int count = 0;
             string line;
+            using(var mat=new StreamWriter("mat.log"))
             while(!sr.EndOfStream)
             {
                 WifiQuery query = null;
@@ -243,11 +265,22 @@ namespace Visualize
                     {
                         textBox1.Text += ex.Message + "\r\n";
                     }
-                if (query.wifi.lon>116.00&& query.wifi.lon<116.99&& query.wifi.lat > 39.70 && query.wifi.lat < 40.30 && r.NextDouble()>0.7)
+                if (choose && mark[query.line] == false) continue;
+                    foreach (var wifi in query.wf)
+                    {
+                        if (wifi.lon>115.7&& wifi.lon<117.3&& wifi.lat > 39.5 && wifi.lat < 40.5)// && r.NextDouble()>0.7)
+                {
+                    ts += "{\"lng\":{lon},\"lat\":{lat},\"count\":1},\r\n".Replace("{lon}", wifi.lon.ToString()).Replace("{lat}", wifi.lat.ToString());
+                    count++;
+                        mat.WriteLine(wifi.lon +" "+ wifi.lat);
+                }
+                    }/*
+                if (query.wifi.lon>116.00&& query.wifi.lon<116.99&& query.wifi.lat > 39.70 && query.wifi.lat < 40.30)// && r.NextDouble()>0.7)
                 {
                     ts += "marker=new BMap.Marker(new BMap.Point({lon},{lat}),{icon:blue});map.addOverlay(marker);\r\n".Replace("{lon}", query.wifi.lon.ToString()).Replace("{lat}", query.wifi.lat.ToString());
                     count++;
-                }
+                        mat.WriteLine(query.wifi.lon +" "+ query.wifi.lat);
+                }*/
             }
                 List<double> lons = new List<double>(), lats = new List<double>();
             lons.Add(116.400244); lats.Add(39.92556);
@@ -257,7 +290,7 @@ namespace Visualize
                     points += "new BMap.Point(" + lons[i] + "," + lats[i] + ")";
                 }
             //webBrowser1.DocumentText = showpage.Replace("{ts}", ts).Replace("{points}", points);
-            using (var sw = new StreamWriter("out.html"))
+            using (var sw = new StreamWriter("out2.html"))
                 sw.WriteLine(showpage.Replace("{ts}", ts).Replace("{points}", points));
             textBox1.Text = count+"";
         }

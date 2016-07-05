@@ -10,7 +10,7 @@ figure
 box on
 hold on
 for i=1:100
-    fill([i-0.5,i+0.5,i+0.5,i-0.5],[1,1,wfnumber(i,2),wfnumber(i,2)],'b')
+    fill([i-0.5,i+0.5,i+0.5,i-0.5],[1,1,wfnumber(i,2),wfnumber(i,2)],'w')
 end
 set(gca,'yscale','log')
 set(gca,'xlim',[0,100])
@@ -22,7 +22,7 @@ figure
 box on
 hold on
 for i=1:100
-    fill([i-0.5,i+0.5,i+0.5,i-0.5],[1,1,wifioccur(i,2),wifioccur(i,2)],'b')
+    fill([i-0.5,i+0.5,i+0.5,i-0.5],[1,1,wifioccur(i,2),wifioccur(i,2)],'w')
 end
 set(gca,'yscale','log')
 set(gca,'xlim',[0,100])

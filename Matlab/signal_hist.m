@@ -24,7 +24,7 @@ hold on
 box on
 [N,edges]=histcounts(signal,50);
 for i=1:size(N,2)
-    fill([(edges(i)),(edges(i+1)),(edges(i+1)),(edges(i))],[1,1,N(i),N(i)],'b')
+    fill([(edges(i)),(edges(i+1)),(edges(i+1)),(edges(i))],[1,1,N(i),N(i)],'w')
 end
 set(gca,'yscale','log')
 %set(gca,'xscale','log')
